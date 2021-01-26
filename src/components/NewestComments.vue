@@ -20,9 +20,11 @@
 
       <div>
         <h4>
-          <a href="#">
-            Golden Hegmann
-          </a>
+          <router-link
+            :to="{ name: 'restaurant', params: {id: comment.Restaurant.id}}"
+          >
+            {{ comment.Restaurant.name }}
+          </router-link>
         </h4>
         <p>Commodi a totam.</p>by
         <a href="#">

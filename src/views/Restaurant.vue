@@ -7,7 +7,8 @@
 
     <!-- 餐廳評論 RestaurantComments -->
     <RestaurantComments 
-      :restaurant-comments="restaurantComments" 
+      :restaurant-comments="restaurantComments"
+      @after-delete-comment="afterDeleteComment"
     />
 
     <!-- 新增評論 CreateComment -->
@@ -151,6 +152,11 @@ export default {
 
       this.restaurantComments = dummyData.restaurant.Comments;
     },
+    afterDeleteComment(commentId) {
+      this.restaurantComments = this.restaurantComments.filter(
+        comment => comment.id !== commentId
+      )
+    }
   },
 };
 </script>

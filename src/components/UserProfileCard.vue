@@ -1,21 +1,28 @@
 <template>
   <div class="row no-gutters">
     <div class="col-md-4">
-      <img
-        src="https://i.imgur.com/3keAGHT.jpeg"
-        width="300px"
-        height="300px"
-      />
+      <img :src="userProfile.image" width="300px" height="300px" />
     </div>
     <div class="col-md-8">
       <div class="card-body">
-        <h5 class="card-title">roo00t</h5>
-        <p class="card-text">root@example.com</p>
+        <h5 class="card-title">{{ userProfile.name }}</h5>
+        <p class="card-text">{{ userProfile.email }}</p>
         <ul class="list-unstyled list-inline">
-          <li><strong>24</strong> 已評論餐廳</li>
-          <li><strong>6</strong> 收藏的餐廳</li>
-          <li><strong>2</strong> followings (追蹤者)</li>
-          <li><strong>2</strong> followers (追隨者)</li>
+          <li>
+            <strong>{{ commentRestaurantCount }}</strong> 已評論餐廳
+          </li>
+          <li>
+            <strong>{{ userProfile.FavoritedRestaurants.length }}</strong>
+            收藏的餐廳
+          </li>
+          <li>
+            <strong> {{ userProfile.Followings.length }} </strong> followings
+            (追蹤者)
+          </li>
+          <li>
+            <strong> {{ userProfile.Followers.length }} </strong> followers
+            (追隨者)
+          </li>
         </ul>
         <p></p>
         <form
@@ -30,3 +37,27 @@
     </div>
   </div>
 </template>
+
+<script>
+export default {
+  props: {
+    userProfile: {
+      type: Object,
+      required: true,
+    },
+    isFollowed: {
+      type: Boolean,
+      required: true,
+    },
+  },
+  computed: {
+    // 已評論的餐廳數量，評論同一間餐廳算一間
+    commentRestaurantCount() {
+      let result = new Set(
+        this.userProfile.Comments.map((comment) => comment.Restaurant.id)
+      );
+      return result.size;
+    },
+  },
+};
+</script>

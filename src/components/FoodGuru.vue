@@ -3,7 +3,16 @@
     <a href="#">
       <img :src="user.image" width="140px" height="140px" />
     </a>
-    <h2>{{ user.name }}</h2>
+    <router-link
+      :to="{
+        name: 'user-profile',
+        params: {
+          id: user.id,
+        },
+      }"
+    >
+      <h2>{{ user.name }}</h2>
+    </router-link>
     <span class="badge badge-secondary"
       >追蹤人數：{{ user.FollowerCount }}</span
     >

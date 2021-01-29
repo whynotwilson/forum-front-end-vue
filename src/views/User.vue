@@ -3,6 +3,10 @@
     <div class="container">
       <div class="card mb-3">
         <!-- UserProfileCard -->
+        <UserProfileCard
+          :user-profile="userProfile"
+          :is-followed="isFollowed"
+        />
       </div>
 
       <div class="row">
@@ -22,6 +26,8 @@
   </div>
 </template>
 <script>
+import UserProfileCard from "./../components/UserProfileCard";
+
 const dummyData = {
   profile: {
     id: 1,
@@ -1287,5 +1293,15 @@ const dummyData = {
   },
   isFollowed: false,
 };
-export default {};
+export default {
+  components: {
+    UserProfileCard,
+  },
+  data() {
+    return {
+      userProfile: dummyData.profile,
+      isFollowed: dummyData.isFollowed,
+    };
+  },
+};
 </script>

@@ -25,12 +25,13 @@
           </li>
         </ul>
         <div>
-          <button 
-            type="submit"
-            class="btn btn-primary"
+          <router-link
             v-if="userProfile.id === currentUser.id"
-            >Edit
-          </button>
+            :to="{ name: 'user-edit', params: { id: currentUser.id }}"
+            class="btn btn-primary"
+          >
+            Edit
+          </router-link>
           <button 
             type="submit" 
             class="btn btn-primary" 

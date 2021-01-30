@@ -6,6 +6,8 @@
         <UserProfileCard
           :user-profile="userProfile"
           :is-followed="isFollowed"
+          @after-add-following="afterAddFollowing"
+          @after-delete-following="deteleFollowing"
         />
       </div>
 
@@ -1237,9 +1239,9 @@ const dummyData = {
     ],
     Followers: [
       {
-        id: 2,
-        name: "user1",
-        email: "user1@example.com",
+        id: 3,
+        name: "user2",
+        email: "user2@example.com",
         password:
           "$2a$10$oNyp9cr8jG7NulbUr56g6e3yvwnttFkoBAmtUYAeQuXkcdFz0Ko6y",
         isAdmin: false,
@@ -1299,9 +1301,31 @@ export default {
   },
   data() {
     return {
-      userProfile: dummyData.profile,
-      isFollowed: dummyData.isFollowed,
+      userProfile: {},
+      isFollowed: false,
     };
   },
+  created() {
+    this.fetchUser()
+  },
+  methods: {
+    fetchUser() {
+      this.userProfile = dummyData.profile
+      this.isFollowed= dummyData.isFollowed
+    },
+    afterAddFollowing(payload) {
+      let currentUser = { 
+        ...payload,
+      }
+      this.userProfile.Followers.push(currentUser)
+      this.isFollowed = true
+    },
+    deteleFollowing(currentUserId) {
+      this.userProfile.Followers = this.userProfile.Followers.filter(
+        Follower => Follower.id !== currentUserId
+      )
+      this.isFollowed = false
+    }
+  }
 };
 </script>

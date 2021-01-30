@@ -1,5 +1,5 @@
 <template>
-  <form>
+  <form @submit.stop.prevent="handleSubmit">
     <div class="form-group">
       <label for="name">Name</label>
       <input
@@ -22,6 +22,13 @@
         name="categoryId"
         required
       >
+        <option
+          value=""
+          selected
+          disabled
+        >
+        -- 請選擇 --
+        </option>
         <option
           v-for="category in categories"
           :key="category.id"
@@ -80,12 +87,21 @@
 
     <div class="form-group">
       <label for="image">Image</label>
+      <img 
+        v-if="restaurant.image"
+        :src="restaurant.image"
+        alt="restaurant"
+        class="d-block img-thumbnail mb-3"
+        width="200"
+        height="200"
+      >
       <input
         id="image"
         type="file"
         name="image"
         accept="image/*"
         class="form-control-file"
+        @change="handleFileChange"
       >
     </div>
 
@@ -150,6 +166,25 @@ export default {
   methods: {
     fetchCategories () {
       this.categories = dummyData.categories
+    },
+    
+    handleSubmit (e) {
+      const form = e.target
+      const formData = new FormData(form)
+      this.$emit('after-submit', formData)
+    },
+
+    handleFileChange (e) {
+      const { files } = e.target
+
+      if (files.length === 0) {
+        // 使用者取消上傳檔案
+        this.restaurant.image = ''
+      } else {
+        // 否則產生預覽圖
+        const imageURL = window.URL.createObjectURL(files[0])
+        this.restaurant.image = imageURL
+      }
     }
   }
 }

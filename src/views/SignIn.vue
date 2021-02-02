@@ -42,6 +42,7 @@ tslint:disable:no-unused-variable
       <button
         class="btn btn-lg btn-primary btn-block mb-3"
         type="submit"
+        :disabled="isProcessing"
       >
         Submit
       </button>
@@ -68,6 +69,7 @@ export default {
     return {
       email: '',
       password: '',
+      isProcessing: false
     }
   },
 
@@ -80,6 +82,8 @@ export default {
         })
         return
       }
+
+      this.isProcessing = true
 
       authorizationAPI.signIn({
         email: this.email,
@@ -95,6 +99,7 @@ export default {
           icon: 'warning',
           title: 'email 或密碼錯誤'
         })
+        this.isProcessing = false
         console.log('error', error)
       })
     }

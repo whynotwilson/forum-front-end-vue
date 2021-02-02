@@ -60,7 +60,7 @@ tslint:disable:no-unused-variable
 </template>
 
 <script>
-// import { response } from 'express'
+import { Toast } from '../utils/helpers'
 import authorizationAPI from './../apis/authorization'
 
 export default {
@@ -73,6 +73,14 @@ export default {
 
   methods: {
     handleSubmit (e) {
+      if (!this.email || !this.password) {
+        Toast.fire({
+          icon: 'error',
+          title: '請填入 email 和 password'
+        })
+        return
+      }
+
       authorizationAPI.signIn({
         email: this.email,
         password: this.password
@@ -81,6 +89,13 @@ export default {
         const { data } = response
         localStorage.setItem('token', data.token)
         this.$router.push('/restaurants')
+      }).catch(error => {
+        this.password = ''
+        Toast.fire({
+          icon: 'warning',
+          title: 'email 或密碼錯誤'
+        })
+        console.log('error', error)
       })
     }
   }

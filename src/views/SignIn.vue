@@ -60,22 +60,28 @@ tslint:disable:no-unused-variable
 </template>
 
 <script>
+// import { response } from 'express'
+import authorizationAPI from './../apis/authorization'
+
 export default {
   data () {
     return {
       email: '',
-      password: ''
+      password: '',
     }
   },
 
   methods: {
-    handleSubmit () {
-      const data = JSON.stringify({
+    handleSubmit (e) {
+      authorizationAPI.signIn({
         email: this.email,
         password: this.password
+      }).then(response => {
+        // TODO: 取得 API 請求後的資料
+        const { data } = response
+        localStorage.setItem('token', data.token)
+        this.$router.push('/restaurants')
       })
-
-      console.log('data', data)
     }
   }
 }

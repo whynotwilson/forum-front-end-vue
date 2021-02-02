@@ -74,26 +74,27 @@ export default {
   },
 
   methods: {
-    handleSubmit (e) {
-      if (!this.email || !this.password) {
-        Toast.fire({
-          icon: 'error',
-          title: '請填入 email 和 password'
+    async handleSubmit (e) {
+      try {
+        if (!this.email || !this.password) {
+          Toast.fire({
+            icon: 'error',
+            title: '請填入 email 和 password'
+          })
+          return
+        }
+
+        this.isProcessing = true
+
+        const response = await authorizationAPI.signIn({
+          email: this.email,
+          password: this.password
         })
-        return
-      }
 
-      this.isProcessing = true
-
-      authorizationAPI.signIn({
-        email: this.email,
-        password: this.password
-      }).then(response => {
-        // TODO: 取得 API 請求後的資料
         const { data } = response
         localStorage.setItem('token', data.token)
         this.$router.push('/restaurants')
-      }).catch(error => {
+      } catch (error) {
         this.password = ''
         Toast.fire({
           icon: 'warning',
@@ -101,7 +102,7 @@ export default {
         })
         this.isProcessing = false
         console.log('error', error)
-      })
+      }
     }
   }
 }

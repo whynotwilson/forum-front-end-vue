@@ -86,7 +86,7 @@ export default {
       } catch (error) {
         Toast.fire({
           icon: "error",
-          title: "無法取得餐廳資料，請稍後再試",
+          title: "伺服器繁忙，請稍候再試",
         });
       }
     },

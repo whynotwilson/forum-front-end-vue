@@ -18,7 +18,7 @@
           <small>{{ restaurant.Category.name }}</small>
         </h4>
         <p>{{ restaurant.description }}</p>
-        {{ restaurant.createdAt | fromNow}}
+        {{ restaurant.createdAt | fromNow }}
         <hr>
       </div>
     </div>

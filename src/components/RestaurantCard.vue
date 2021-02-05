@@ -100,7 +100,7 @@ export default {
     async deleteFavorite(restaurantId) {
       try {
         const { data } = await usersAPI.deleteFavorite({ restaurantId });
-        console.log("data", data);
+        
         if (data.status !== "success") {
           throw new Error(data.message);
         }

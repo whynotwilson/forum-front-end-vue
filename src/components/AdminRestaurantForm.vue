@@ -119,7 +119,6 @@
 </template>
 
 <script>
-import admin from './../apis/admin'
 import adminAPI from './../apis/admin'
 import { apiHelper, Toast } from './../utils/helpers'
 
@@ -158,12 +157,18 @@ export default {
       isLoading: true
     }
   },
+
+  watch: {
+    initialRestaurant (newValue) {
+      this.restaurant = {
+        ...this.restaurant,
+        ...newValue
+      }
+    }
+  },
+
   created() {
     this.fetchCategories()
-    this.restaurant = {
-      ...this.restaurant,
-      ...this.initialRestaurant
-    }
   },
 
   methods: {

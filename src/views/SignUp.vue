@@ -70,6 +70,7 @@ tslint:disable:no-unused-variable
       <button
         class="btn btn-lg btn-primary btn-block mb-3"
         type="submit"
+        :disabled='isProcessing'
       >
         Submit
       </button>
@@ -90,26 +91,51 @@ tslint:disable:no-unused-variable
 </template>
 
 <script>
+import usersAPI from './../apis/users'
+import { Toast } from './../utils/helpers'
+
 export default {
   data () {
     return {
       name: '',
       email: '',
       password: '',
-      passwordCheck: ''
+      passwordCheck: '',
+      isProcessing: false
     }
   },
 
   methods: {
-    handleSubmit () {
-      const data = JSON.stringify({
-        name: this.name,
-        email: this.email,
-        password: this.password,
-        passwordCheck: this.passwordCheck
-      })
+    async handleSubmit () {
+      try {
+        this.isProcessing = true
+        
+        const formData = {
+          name: this.name,
+          email: this.email,
+          password: this.password,
+          passwordCheck: this.passwordCheck
+        }
 
-      console.log('data', data)
+        const { data } = await usersAPI.signUp({ formData })
+
+        if (data.status !== 'success') {
+          throw new Error(data.message)
+        }
+
+        Toast.fire({
+          icon: 'success',
+          title: data.message
+        })
+
+        this.$router.push({ name: 'sign-in' })
+      } catch (error) {
+        this.isProcessing = false
+        Toast.fire({
+          icon: 'error',
+          title: error || '伺服器錯誤，請稍候再試'
+        })
+      }
     }
   }
 }

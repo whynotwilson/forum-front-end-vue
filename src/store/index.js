@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import usersAPI from './../apis/users'
 
 Vue.use(Vuex)
 
@@ -22,7 +23,7 @@ export default new Vuex.Store({
     setCurrentUser(state, currentUser) {
       state.currentUser = {
         ...state.currentUser,
-        ...currentUser 
+        ...currentUser
       }
       state.isAuthenticated = true
     }
@@ -30,6 +31,27 @@ export default new Vuex.Store({
 
   // 設定其他的非同步函式，例如發送 API 請求等等
   actions: {
+    async fetchCurrentUser({ commit }) {
+      try {
+        const { data, statusText } = await usersAPI.getCurrentUser()
+
+        if (statusText === 'error') {
+          throw new Error(data)
+        }
+
+        const { id, name, email, image, isAdmin } = data
+
+        commit('setCurrentUser', {
+          id,
+          name,
+          email,
+          image,
+          isAdmin
+        })
+      } catch (error) {
+        console.error(error.message)
+      }
+    }
   },
 
   modules: {

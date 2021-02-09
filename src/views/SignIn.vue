@@ -91,8 +91,16 @@ export default {
           password: this.password
         })
 
-        const { data } = response
+        const { data, statusText } = response
+
+        if(statusText !== 'OK' || data.status !== 'success') {
+          throw new Error(statusText)
+        }
+
         localStorage.setItem('token', data.token)
+        
+        this.$store.commit('setCurrentUser', data.user)
+
         this.$router.push('/restaurants')
       } catch (error) {
         this.password = ''
@@ -101,7 +109,6 @@ export default {
           title: 'email 或密碼錯誤'
         })
         this.isProcessing = false
-        console.log('error', error)
       }
     }
   }

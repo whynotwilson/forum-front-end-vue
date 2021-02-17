@@ -43,7 +43,7 @@
         type="button"
         class="btn btn-danger btn-border mr-2"
         v-if="restaurant.isFavorited"
-        @click.stop.prevent="deleteFavorite"
+        @click.stop.prevent="deleteFavorite(restaurant.id)"
       >
         移除最愛
       </button>
@@ -51,7 +51,7 @@
         type="button"
         class="btn btn-primary btn-border mr-2"
         v-else
-        @click.stop.prevent="addFavorite"
+        @click.stop.prevent="addFavorite(restaurant.id)"
       >
         加到最愛
       </button>
@@ -59,7 +59,7 @@
         type="button"
         class="btn btn-danger like mr-2"
         v-if="restaurant.isLiked"
-        @click.stop.prevent="deleteLike"
+        @click.stop.prevent="deleteLike(restaurant.id)"
       >
         Unlike
       </button>
@@ -67,7 +67,7 @@
         type="button"
         class="btn btn-primary like mr-2"
         v-else
-        @click.stop.prevent="addLike"
+        @click.stop.prevent="addLike(restaurant.id)"
       >
         Like
       </button>
@@ -76,6 +76,10 @@
 </template>
 
 <script>
+import usersAPI from './../apis/users'
+import { Toast } from './../utils/helpers'
+import { mapState } from 'vuex'
+
 export default {
   props: {
     initialRestaurant: {
@@ -90,6 +94,10 @@ export default {
     };
   },
 
+  computed: {
+    ...mapState(['currentUser'])
+  },
+
   watch: {
     initialRestaurant(newValue) {
       this.restaurant = {
@@ -100,32 +108,107 @@ export default {
   },
 
   methods: {
-    addFavorite() {
-      this.restaurant = {
+    async addFavorite(restaurantId) {
+      try {
+        const UserId = this.currentUser.id
+        const { data } = await usersAPI.addFavorite({ restaurantId })
+
+        if (data.status !== 'success') {
+          throw new Error(data.message)
+        }
+
+        Toast.fire({
+          icon: 'success',
+          title: '成功加入最愛'
+        })
+
+        this.restaurant = {
         ...this.restaurant,
         isFavorited: true,
       };
+      } catch (error) {
+        console.log(error)
+        Toast.fire({
+          icon: 'error',
+          title: error.Error || '無法加入最愛，請稍候再試'
+        })
+      }
     },
 
-    deleteFavorite() {
-      this.restaurant = {
-        ...this.restaurant,
-        isFavorited: false,
-      };
+    async deleteFavorite(restaurantId) {
+      try {
+          const { data } = await usersAPI.deleteFavorite({ restaurantId })
+
+          if (data.status !== 'success') {
+            throw new Error(data.message)
+          }
+
+          Toast.fire({
+            icon: 'success',
+            title: '成功刪除最愛'
+          })
+
+          this.restaurant = {
+          ...this.restaurant,
+          isFavorited: false,
+        };
+      } catch (error) {
+        Toast.fire({
+          icon: 'error',
+          title: error.Error || '無法刪除最愛，請稍候再試'
+        })
+      }
     },
 
-    addLike() {
-      this.restaurant = {
+    async addLike(restaurantId) {
+      try {
+        const UserId = this.currentUser.id
+        const { data } = await usersAPI.addLike({ restaurantId })
+
+        if (data.status !== 'success') {
+          throw new Error(data.message)
+        }
+
+        Toast.fire({
+          icon: 'success',
+          title: '成功加入最愛'
+        })
+
+        this.restaurant = {
         ...this.restaurant,
         isLiked: true,
       };
+      } catch (error) {
+        Toast.fire({
+          icon: 'error',
+          title: error.Error || '無法加入最愛，請稍候再試'
+        })
+      }
     },
     
-    deleteLike() {
-      this.restaurant = {
-        ...this.restaurant,
-        isLiked: false,
-      };
+    async deleteLike(restaurantId) {
+      try {
+          const { data } = await usersAPI.deleteLike({ restaurantId })
+
+          if (data.status !== 'success') {
+            throw new Error(data.message)
+          }
+
+          Toast.fire({
+            icon: 'success',
+            title: '成功刪除最愛'
+          })
+
+          this.restaurant = {
+          ...this.restaurant,
+          isLiked: false,
+        };
+      } catch (error) {
+        Toast.fire({
+          icon: 'error',
+          title: error.Error || '無法刪除最愛，請稍候再試'
+        })
+      }
     },
   },
 };

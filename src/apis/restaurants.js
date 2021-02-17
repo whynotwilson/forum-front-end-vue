@@ -27,4 +27,16 @@ export default {
       headers: { Authorization: `Bearer ${getToken()}` }
     })
   },
+
+  deleteComment({commentId}) {
+    return apiHelper.delete(`/comments/${commentId}`, {
+      headers: { Authorization: `Bearer ${getToken()}` }
+    })
+  },
+
+  createComment({ userId, restaurantId, text }) {
+    return apiHelper.post(`/comments`, { userId, restaurantId, text }, {
+      headers: { Authorization: `Bearer ${getToken()}` }
+    })
+  },
 }

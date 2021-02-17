@@ -83,33 +83,47 @@ export default {
       required: true,
     },
   },
+
   data() {
     return {
-      restaurant: this.initialRestaurant,
+      restaurant: this.initialRestaurant
     };
   },
+
+  watch: {
+    initialRestaurant(newValue) {
+      this.restaurant = {
+        ...this.restaurant,
+        ...newValue,
+      }
+    }
+  },
+
   methods: {
     addFavorite() {
       this.restaurant = {
-        ...this.restaurant, // 保留餐廳內原有資料
+        ...this.restaurant,
         isFavorited: true,
       };
     },
+
     deleteFavorite() {
       this.restaurant = {
-        ...this.restaurant, // 保留餐廳內原有資料
+        ...this.restaurant,
         isFavorited: false,
       };
     },
+
     addLike() {
       this.restaurant = {
-        ...this.restaurant, // 保留餐廳內原有資料
+        ...this.restaurant,
         isLiked: true,
       };
     },
+    
     deleteLike() {
       this.restaurant = {
-        ...this.restaurant, // 保留餐廳內原有資料
+        ...this.restaurant,
         isLiked: false,
       };
     },

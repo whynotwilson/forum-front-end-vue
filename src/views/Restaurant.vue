@@ -23,105 +23,9 @@
 import RestaurantDetail from "./../components/RestaurantDetail";
 import RestaurantComments from "./../components/RestaurantComments"
 import CreateComment from "./../components/CreateComment"
-
-const dummyData = {
-  restaurant: {
-    id: 1,
-    name: "Graciela Schinner",
-    tel: "039.312.8203",
-    address: "4944 Corwin Prairie",
-    opening_hours: "08:00",
-    description:
-      "Ex maiores omnis necessitatibus dolores sunt quibusdam. Voluptatem optio aut autem corrupti. Aperiam alias magnam molestiae laboriosam. Maxime sunt quaerat hic fuga beatae sed ad enim.\n \rAccusantium et incidunt consectetur omnis fugit beatae eos in. Est aliquid repellendus qui est expedita sequi atque. Modi consectetur quia sunt molestiae aut.\n \rQuia omnis eos veritatis. Optio animi neque velit nobis et quibusdam quasi esse sint. Nostrum sit quia nesciunt voluptatem consequatur non ut quis. Odio voluptatibus iusto vitae deserunt ab rerum unde. Deleniti sequi qui et neque est quia.",
-    image:
-      "https://loremflickr.com/320/240/restaurant,food/?random=53.40956699833694",
-    viewCounts: 1,
-    createdAt: "2021-01-25T15:50:18.000Z",
-    updatedAt: "2021-01-25T15:54:37.501Z",
-    CategoryId: 5,
-    Category: {
-      id: 5,
-      name: "素食料理",
-      createdAt: "2021-01-25T15:50:18.000Z",
-      updatedAt: "2021-01-25T15:50:18.000Z",
-    },
-    FavoritedUsers: [],
-    LikedUsers: [],
-    Comments: [
-      {
-        id: 51,
-        text: "Assumenda laborum velit repellat totam.",
-        UserId: 1,
-        RestaurantId: 1,
-        createdAt: "2021-01-25T15:50:18.000Z",
-        updatedAt: "2021-01-25T15:50:18.000Z",
-        User: {
-          id: 1,
-          name: "root",
-          email: "root@example.com",
-          password:
-            "$2a$10$9dHkLxWg./Y6W6zEtgsyNOA4VT3EcB7bSQNcQ59SBmNZGhT9cwPTq",
-          isAdmin: true,
-          image: null,
-          createdAt: "2021-01-25T15:50:17.000Z",
-          updatedAt: "2021-01-25T15:50:17.000Z",
-        },
-      },
-      {
-        id: 1,
-        text:
-          "Dicta cupiditate non cumque et assumenda eius similique tempore et.",
-        UserId: 2,
-        RestaurantId: 1,
-        createdAt: "2021-01-25T15:50:18.000Z",
-        updatedAt: "2021-01-25T15:50:18.000Z",
-        User: {
-          id: 2,
-          name: "user1",
-          email: "user1@example.com",
-          password:
-            "$2a$10$vgKGf5tTlrfFq2Le6yMBwOU1QGgtHl/bLnPSTeX88PQzhFqIOurX2",
-          isAdmin: false,
-          image: null,
-          createdAt: "2021-01-25T15:50:18.000Z",
-          updatedAt: "2021-01-25T15:50:18.000Z",
-        },
-      },
-      {
-        id: 101,
-        text: "A quos est consectetur vel quis natus exercitationem dolor.",
-        UserId: 2,
-        RestaurantId: 1,
-        createdAt: "2021-01-25T15:50:18.000Z",
-        updatedAt: "2021-01-25T15:50:18.000Z",
-        User: {
-          id: 2,
-          name: "user1",
-          email: "user1@example.com",
-          password:
-            "$2a$10$vgKGf5tTlrfFq2Le6yMBwOU1QGgtHl/bLnPSTeX88PQzhFqIOurX2",
-          isAdmin: false,
-          image: null,
-          createdAt: "2021-01-25T15:50:18.000Z",
-          updatedAt: "2021-01-25T15:50:18.000Z",
-        },
-      },
-    ],
-  },
-  isFavorited: false,
-  isLiked: false,
-};
-
-const dummyUser = {
-  currentUser: {
-    id: 1,
-    name: '管理者',
-    email: 'root@example.com',
-    image: 'https://i.pravatar.cc/300',
-    isAdmin: true
-  },
-  isAuthenticated: true
-}
+import restaurantsAPI from "./../apis/restaurants"
+import { Toast } from "./../utils/helpers"
+import { mapState } from 'vuex'
 
 export default {
   components: {
@@ -129,6 +33,7 @@ export default {
     RestaurantComments,
     CreateComment
   },
+
   data() {
     return {
       restaurant: {
@@ -144,37 +49,74 @@ export default {
         isLiked: false,
       },
       restaurantComments: [],
-      currentUser: dummyUser.currentUser
     };
   },
+
+  computed: {
+    ...mapState(['currentUser'])
+  },
+
   created() {
     const { id: restaurantId } = this.$route.params;
     this.fetchRestaurant(restaurantId);
   },
+
+  beforeRouteUpdate(to, from, next) {
+    const { id: restaurantId } = to.params
+    this.fetchRestaurant(restaurantId)
+    next()
+  },
+
   methods: {
-    fetchRestaurant(restaurantId) {
-      console.log("fetchRestaurant id: ", restaurantId);
+    async fetchRestaurant(restaurantId) {
+      try {
+        const { data } = await restaurantsAPI.getRestaurant({ restaurantId })
 
-      this.restaurant = {
-        id: dummyData.restaurant.id,
-        name: dummyData.restaurant.name,
-        categoryName: dummyData.restaurant.Category.name,
-        image: dummyData.restaurant.image,
-        openingHours: dummyData.restaurant.opening_hours,
-        tel: dummyData.restaurant.tel,
-        address: dummyData.restaurant.address,
-        description: dummyData.restaurant.description,
-        isFavorited: dummyData.isFavorited,
-        isLiked: dummyData.isLiked,
-      };
+        if (data.status === 'error') {
+          throw new Error(data.message)
+        }
 
-      this.restaurantComments = dummyData.restaurant.Comments;
+        const { restaurant, isFavorited, isLiked } = data
+        const {
+          id,
+          name,
+          Category,
+          image,
+          opening_hours: openingHours,
+          tel,
+          address,
+          description,
+          Comments
+        } = restaurant
+
+        this.restaurant = {
+          id,
+          name,
+          categoryName: Category ? Category.name : '未分類',
+          image,
+          openingHours,
+          tel,
+          address,
+          description,
+          isFavorited,
+          isLiked
+        }
+
+        this.restaurantComments = Comments
+      } catch(error) {
+        Toast.fire({
+          icon: 'error',
+          title: '無法取得餐廳資料，請稍後再試'
+        })
+      }
     },
+
     afterDeleteComment(commentId) {
       this.restaurantComments = this.restaurantComments.filter(
         comment => comment.id !== commentId
       )
     },
+
     afterCreateComment (payload) {
       const { commentId, restaurantId, text } = payload
       // console.log('payload', commentId, restaurantId, text)

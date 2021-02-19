@@ -27,20 +27,21 @@
         <div>
           <router-link
             v-if="userProfile.id === currentUser.id"
-            :to="{ name: 'user-edit', params: { id: currentUser.id }}"
+            :to="{ name: 'user-edit', params: { id: currentUser.id } }"
             class="btn btn-primary"
           >
             Edit
           </router-link>
-          <button 
-            type="submit" 
-            class="btn btn-primary" 
+          <button
+            type="submit"
+            class="btn btn-primary"
             v-else-if="!isFollowed"
             @click.stop.prevent="addFollowing"
-            >追蹤
+          >
+            追蹤
           </button>
           <form
-            v-if="userProfile.id !== currentUser.id & isFollowed"
+            v-if="(userProfile.id !== currentUser.id) & isFollowed"
             @submit.stop.prevent="deteleFollowing"
             action="/following/1?_method=DELETE"
             method="POST"
@@ -55,30 +56,11 @@
 </template>
 
 <script>
-const dummyUser = {
-  currentUser: {
-    id: 2,
-    name: 'user1',
-    email: 'user1@example.com',
-    image: 'https://i.pravatar.cc/300',
-    isAdmin: false
-  },
-  isAuthenticated: true
-}
+import { mapState } from "vuex";
+import usersAPI from "./../apis/users";
+import { Toast } from "./../utils/helpers";
 
 export default {
-  data() {
-    return {
-      currentUser: {
-        id: -1,
-        name: '',
-        email: '',
-        image: '',
-        isAdmin: false,
-      },
-      isAuthenticated: false
-    }
-  },
   props: {
     userProfile: {
       type: Object,
@@ -89,7 +71,10 @@ export default {
       required: true,
     },
   },
+
   computed: {
+    ...mapState(["currentUser"]),
+
     // 已評論的餐廳數量，評論同一間餐廳算一間
     commentRestaurantCount() {
       let result = new Set(
@@ -98,36 +83,57 @@ export default {
       return result.size;
     },
   },
+
   methods: {
-    fetchCurrentUser () {
-      this.currentUser = {
-        ...dummyUser.currentUser,
+    async addFollowing() {
+      try {
+        // 向 API 發送 POST 請求
+        const userId = this.$route.params.id;
+        const { data } = await usersAPI.addFollowing({ userId });
+
+        if (data.status !== "success") {
+          throw new Error(data.message);
+        }
+
+        // 伺服器新增 Following 成功後
+        this.$emit("after-add-following", {
+          Followship: "",
+          createdAt: "2019-07-30T16:24:55.204Z",
+          email: this.currentUser.email,
+          id: this.currentUser.id,
+          image: this.currentUser.image,
+          isAdmin: false,
+          name: this.currentUser.name,
+          password:
+            "$2a$10$oNyp9cr8jG7NulbUr56g6e3yvwnttFkoBAmtUYAeQuXkcdFz0Ko6y",
+          updatedAt: "f",
+        });
+      } catch (error) {
+        Toast.fire({
+          icon: "error",
+          title: "無法加入追蹤，請稍候再試",
+        });
       }
-      this.isAuthenticated = dummyUser.isAuthenticated
     },
-    addFollowing() {
-      // TODO: 向 API 發送 POST 請求
-      // 伺服器新增 Following 成功後...
-      this.$emit('after-add-following', {
-        Followship:'',
-        createdAt:"2019-07-30T16:24:55.204Z",
-        email: this.currentUser.email,
-        id: this.currentUser.id,
-        image: this.currentUser.image,
-        isAdmin:false,
-        name: this.currentUser.name,
-        password:"$2a$10$oNyp9cr8jG7NulbUr56g6e3yvwnttFkoBAmtUYAeQuXkcdFz0Ko6y",
-        updatedAt:'f'
-      })
+
+    async deteleFollowing() {
+      try {
+        const userId = this.$route.params.id;
+        const { data } = await usersAPI.deleteFollowing({ userId });
+
+        if (data.status !== "success") {
+          throw new Error(data.message);
+        }
+
+        // 伺服器刪除 Following 成功後...
+        this.$emit("after-delete-following", this.currentUser.id);
+      } catch (error) {
+        Toast.fire({
+          icon: "error",
+          title: "無法取消追蹤，請稍候再試",
+        });
+      }
     },
-    deteleFollowing() {
-      // TODO: 向 API 發送 POST 請求
-      // 伺服器刪除 Following 成功後...
-      this.$emit('after-delete-following', this.currentUser.id)
-    }
   },
-  created() {
-    this.fetchCurrentUser()
-  }
 };
 </script>

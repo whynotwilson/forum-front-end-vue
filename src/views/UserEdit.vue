@@ -11,7 +11,7 @@
           class="form-control"
           placeholder="Enter Name"
           required
-        >
+        />
       </div>
 
       <div class="form-group">
@@ -23,7 +23,7 @@
           class="d-block img-thumbnail mb-3"
           width="200"
           height="200"
-        >
+        />
         <input
           id="image"
           type="file"
@@ -31,73 +31,114 @@
           accept="image/*"
           class="form-control-file"
           @change="handleFileChange"
-        >
+        />
       </div>
 
-      <button
-        type="submit"
-        class="btn btn-primary"
-      >
-        Submit
+      <button type="submit" class="btn btn-primary" :disabled="isProcessing">
+        {{ isProcessing ? "處理中..." : "送出" }}
       </button>
     </form>
   </div>
 </template>
 
 <script>
-const dummyUser = {
-  userData: {
-    name: 'user_TEST',
-    image: 'https://loremflickr.com/320/240/restaurant,food/?random=91.29816290184887',
-  }
-}
+import usersAPI from "./../apis/users";
+import { Toast } from "./../utils/helpers";
+import { mapState } from "vuex";
 
 export default {
-  data () {
+  data() {
     return {
       userData: {
-        name: '',
-        image: ''
-      }
-    }
+        name: "",
+        image: "",
+      },
+      isProcessing: false,
+    };
   },
 
-  created () {
-    const { id } = this.$route.params
-    this.fetchUserData(id)
+  computed: {
+    ...mapState(["currentUser"]),
+  },
+
+  created() {
+    const { id } = this.$route.params;
+    this.setUser(id);
+  },
+
+  watch: {
+    currentUser: function (newValue, oldValue) {
+      console.log("oldValue", oldValue);
+      console.log("newValue", newValue);
+      if (newValue.id !== this.$route.params.id) {
+        this.$router.push({ name: "not-found" });
+      } else {
+        this.setUser(newValue.id);
+      }
+    },
   },
 
   methods: {
-    fetchUserData (userId) {
-      console.log('userId', userId)
-      const { userData } = dummyUser
+    setUser(userId) {
+      console.log("userId", userId);
+      const userData = this.currentUser;
       this.userData = {
         ...userData,
         name: userData.name,
-        image: userData.image
-      }
+        image: userData.image,
+      };
     },
-    
-    handleFileChange (e) {
-      const { files } = e.target
+
+    handleFileChange(e) {
+      const { files } = e.target;
       if (files.length === 0) {
-        this.userData.image = ''
+        this.userData.image = "";
       } else {
-        const imageURL = window.URL.createObjectURL(files[0])
-        this.userData.image = imageURL
+        const imageURL = window.URL.createObjectURL(files[0]);
+        this.userData.image = imageURL;
       }
     },
 
-    handleSubmit (e) {
-      const form = e.target
-      const formData = new FormData(form)
+    async handleSubmit(e) {
+      try {
+        if (!this.userData.name) {
+          Toast.fire({
+            icon: "error",
+            title: "請輸入姓名",
+          });
+          return;
+        }
+        this.isProcessing = true;
+        const form = e.target;
+        const formData = new FormData(form);
 
-      // TO DO: 透過 API 將表單資料送到伺服器
+        //透過 API 將表單資料送到伺服器
+        const { data } = await usersAPI.update({
+          userId: this.currentUser.id,
+          formData,
+        });
+        if (data.status !== "success") {
+          throw new Error(data.message);
+        }
 
-      for (let [name, value] of formData.entries()) {
-        console.log(name + ': ' + value)
+        Toast.fire({
+          icon: "success",
+          title: "資料更新成功",
+        });
+
+        this.$router.push({ name: "user-profile" });
+
+        for (let [name, value] of formData.entries()) {
+          console.log(name + ": " + value);
+        }
+      } catch (error) {
+        Toast.fire({
+          icon: "error",
+          title: "無法更新使用者，請稍後再試",
+        });
+        this.isProcessing = false;
       }
     },
-  }
-}
+  },
+};
 </script>

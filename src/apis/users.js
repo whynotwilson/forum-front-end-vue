@@ -14,6 +14,12 @@ export default {
     })
   },
 
+  update({ userId, formData }) {
+    return apiHelper.put(`/users/${userId}`, formData, {
+      headers: { Authorization: `Bearer ${getToken()}` }
+    })
+  },
+
   signUp({ formData }) {
     return apiHelper.post('/signup', formData, {
       headers: { Authorization: `Bearer ${getToken()}` }

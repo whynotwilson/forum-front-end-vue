@@ -62,50 +62,9 @@
 
 <script>
 import AdminNav from "./../components/AdminNav.vue";
-
-const dummyUsers = {
-  users: [
-    {
-      id: 1,
-      name: "root",
-      email: "root@example.com",
-      password: "$2a$10$9dHkLxWg./Y6W6zEtgsyNOA4VT3EcB7bSQNcQ59SBmNZGhT9cwPTq",
-      isAdmin: true,
-      image: null,
-      createdAt: "2021-01-25T15:50:17.000Z",
-      updatedAt: "2021-01-25T15:50:17.000Z",
-    },
-    {
-      id: 2,
-      name: "user1",
-      email: "user1@example.com",
-      password: "$2a$10$vgKGf5tTlrfFq2Le6yMBwOU1QGgtHl/bLnPSTeX88PQzhFqIOurX2",
-      isAdmin: false,
-      image: null,
-      createdAt: "2021-01-25T15:50:18.000Z",
-      updatedAt: "2021-01-25T15:50:18.000Z",
-    },
-    {
-      id: 3,
-      name: "user2",
-      email: "user2@example.com",
-      password: "$2a$10$P01PzPO25NKWOudhZkQLT.HLDpVrvn2x9BaMReFQRfsYiF78j6qfK",
-      isAdmin: false,
-      image: null,
-      createdAt: "2021-01-25T15:50:18.000Z",
-      updatedAt: "2021-01-25T15:50:18.000Z",
-    },
-  ],
-
-  currentUser: {
-    id: 1,
-    name: "root",
-    email: "root@example.com",
-    image: "https://i.pravatar.cc/300",
-    isAdmin: true,
-  },
-  isAuthenticated: true,
-};
+import adminAPI from "./../apis/admin";
+import { Toast } from "./../utils/helpers";
+import { mapState } from "vuex";
 
 export default {
   components: {
@@ -127,29 +86,43 @@ export default {
   },
 
   methods: {
-    fetchUsers() {
-      this.users = dummyUsers.users.map((user) => ({
-        ...user,
-      }));
+    async fetchUsers() {
+      try {
+        const { data } = await adminAPI.users.get();
+        this.users = data.users.map((user) => ({
+          ...user,
+        }));
+      } catch (error) {
+        Toast.fire({
+          icon: "error",
+          title: "無法取得所有 user 資料，請稍候再試",
+        });
+      }
     },
 
-    fetchCurrentUser() {
-      this.currentUser = dummyUsers.currentUser;
-    },
-
-    toggleUserRole(userId) {
-      // 向 API 請求更改 user admin 完成後
-
-      this.users = this.users.map((user) => {
-        if (user.id === userId) {
-          return {
-            ...user,
-            isAdmin: !user.isAdmin,
-          };
+    async toggleUserRole(userId) {
+      try {
+        const { data } = await adminAPI.users.update({ userId });
+        if (data.status !== "success") {
+          throw new Error(data.message);
         }
 
-        return user;
-      });
+        this.users = this.users.map((user) => {
+          if (user.id === userId) {
+            return {
+              ...user,
+              isAdmin: !user.isAdmin,
+            };
+          }
+
+          return user;
+        });
+      } catch (error) {
+        Toast.fire({
+          icon: "error",
+          title: "無法更改 user 資料，請稍候再試",
+        });
+      }
     },
   },
 
@@ -159,6 +132,7 @@ export default {
   },
 
   computed: {
+    ...mapState(["currentUser", "isAuthenticated"]),
     isCurrentUserIsAdmin() {
       if (this.currentUser.isAdmin) {
         return this.currentUser.id;

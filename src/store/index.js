@@ -15,7 +15,8 @@ export default new Vuex.Store({
       image: '',
       isAdmin: false
     },
-    isAuthenticated: false
+    isAuthenticated: false,
+    token: ''
   },
 
   // 類似 fetchRestaurants 功能，向 API 抓取資料
@@ -25,7 +26,16 @@ export default new Vuex.Store({
         ...state.currentUser,
         ...currentUser
       }
+      // 將使用者驗證用的 token 儲存在 state 中
+      state.token = localStorage.getItem('token')
       state.isAuthenticated = true
+    },
+    revokeAuthentication(state) {
+      state.currentUser = {}
+      state.isAuthenticated = false
+      // 登出時一併將 state 內的 token 移除
+      state.token = ''
+      localStorage.removeItem('token')
     }
   },
 
@@ -48,8 +58,12 @@ export default new Vuex.Store({
           image,
           isAdmin
         })
+        return true
       } catch (error) {
-        console.error(error.message)
+        console.error('can not fetch user information')
+        // 驗證失敗的話一併觸發登出的行為，以清除 state 中的 token
+        commit('revokeAuthentication')
+        return false
       }
     }
   },

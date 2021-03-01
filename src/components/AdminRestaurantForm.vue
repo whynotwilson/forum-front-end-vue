@@ -1,8 +1,6 @@
 <template>
-  <form 
-    v-show="!isLoading"
-    @submit.stop.prevent="handleSubmit"
-  >
+  <Spinner v-if="isLoading" />
+  <form v-else @submit.stop.prevent="handleSubmit">
     <div class="form-group">
       <label for="name">Name</label>
       <input
@@ -13,7 +11,7 @@
         name="name"
         placeholder="Enter name"
         required
-      >
+      />
     </div>
 
     <div class="form-group">
@@ -25,13 +23,7 @@
         name="categoryId"
         required
       >
-        <option
-          value=""
-          selected
-          disabled
-        >
-        -- 請選擇 --
-        </option>
+        <option value="" selected disabled>-- 請選擇 --</option>
         <option
           v-for="category in categories"
           :key="category.id"
@@ -51,7 +43,7 @@
         class="form-control"
         name="tel"
         placeholder="Enter telephone number"
-      >
+      />
     </div>
 
     <div class="form-group">
@@ -63,7 +55,7 @@
         class="form-control"
         placeholder="Enter address"
         name="address"
-      >
+      />
     </div>
 
     <div class="form-group">
@@ -74,7 +66,7 @@
         type="time"
         class="form-control"
         name="opening_hours"
-      >
+      />
     </div>
 
     <div class="form-group">
@@ -90,14 +82,14 @@
 
     <div class="form-group">
       <label for="image">Image</label>
-      <img 
+      <img
         v-if="restaurant.image"
         :src="restaurant.image"
         alt="restaurant"
         class="d-block img-thumbnail mb-3"
         width="200"
         height="200"
-      >
+      />
       <input
         id="image"
         type="file"
@@ -105,119 +97,117 @@
         accept="image/*"
         class="form-control-file"
         @change="handleFileChange"
-      >
+      />
     </div>
 
-    <button
-      type="submit"
-      class="btn btn-primary"
-      :disabled="isProcessing"
-    >
+    <button type="submit" class="btn btn-primary" :disabled="isProcessing">
       {{ isProcessing ? "處理中..." : "送出" }}
     </button>
   </form>
 </template>
 
 <script>
-import adminAPI from './../apis/admin'
-import { apiHelper, Toast } from './../utils/helpers'
+import adminAPI from "./../apis/admin";
+import { apiHelper, Toast } from "./../utils/helpers";
+import Spinner from "./../components/Spinner";
 
 export default {
+  components: { Spinner },
   props: {
     initialRestaurant: {
       type: Object,
       default: () => ({
-        name:'',
-        categoryId: '',
-        tel: '',
-        address: '',
-        description: '',
-        image: '',
-        openingHours: '',
-      })
+        name: "",
+        categoryId: "",
+        tel: "",
+        address: "",
+        description: "",
+        image: "",
+        openingHours: "",
+      }),
     },
     isProcessing: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
 
-  data () {
+  data() {
     return {
       restaurant: {
-        name: '',
-        categoryId: '',
-        tel: '',
-        address: '',
-        description: '',
-        image: '',
-        openingHours: ''
+        name: "",
+        categoryId: "",
+        tel: "",
+        address: "",
+        description: "",
+        image: "",
+        openingHours: "",
       },
       categories: [],
-      isLoading: true
-    }
+      isLoading: true,
+    };
   },
 
   watch: {
-    initialRestaurant (newValue) {
+    initialRestaurant(newValue) {
       this.restaurant = {
         ...this.restaurant,
-        ...newValue
-      }
-    }
+        ...newValue,
+      };
+    },
   },
 
   created() {
-    this.fetchCategories()
+    this.fetchCategories();
   },
 
   methods: {
-    async fetchCategories () {
+    async fetchCategories() {
       try {
-        const { data } = await adminAPI.categories.get()
-        this.isLoading = false
-        this.categories = data.categories
+        const { data } = await adminAPI.categories.get();
+        this.isLoading = false;
+        this.categories = data.categories;
       } catch (error) {
-        this.isLoading = false
+        this.isLoading = false;
         Toast.fire({
-          icon: 'error',
-          title: '無法取得餐廳類別，請稍候再試'
-        })
+          icon: "error",
+          title: "無法取得餐廳類別，請稍候再試",
+        });
       }
-    },
-    
-    handleSubmit (e) {
-      if (!this.restaurant.name) {
-        Toast.fire({
-          icon: 'warning',
-          title: '請填寫餐廳名稱'
-        })
-        return
-      } else if (!this.restaurant.categoryId) {
-        Toast.fire({
-          icon: 'warning',
-          title: '請選擇餐廳類別'
-        })
-        return
-      }
-      
-      const form = e.target
-      const formData = new FormData(form)
-      this.$emit('after-submit', formData)
     },
 
-    handleFileChange (e) {
-      const { files } = e.target
+    handleSubmit(e) {
+      if (!this.restaurant.name) {
+        Toast.fire({
+          icon: "warning",
+          title: "請填寫餐廳名稱",
+        });
+        return;
+      } else if (!this.restaurant.categoryId) {
+        Toast.fire({
+          icon: "warning",
+          title: "請選擇餐廳類別",
+        });
+        return;
+      }
+
+      const form = e.target;
+      const formData = new FormData(form);
+      this.$emit("after-submit", formData);
+    },
+
+    handleFileChange(e) {
+      const { files } = e.target;
 
       if (files.length === 0) {
         // 使用者取消上傳檔案
-        this.restaurant.image = ''
+        this.restaurant.image = "";
       } else {
         // 否則產生預覽圖
-        const imageURL = window.URL.createObjectURL(files[0])
-        this.restaurant.image = imageURL
+        const imageURL = window.URL.createObjectURL(files[0]);
+        this.restaurant.image = imageURL;
       }
-    }
-  }
-}
+    },
+  },
+};
 </script>

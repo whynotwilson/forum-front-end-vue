@@ -1,12 +1,13 @@
 <template>
   <div class="col-md-6 col-lg-4">
-    <div class="card mb-4">
+    <div v-show="!isLoading" class="card mb-4">
       <img
         class="card-img-top"
         :src="restaurant.image"
         alt="Card image cap"
         width="286px"
         height="180px"
+        @load="changeLoading"
       />
       <div class="card-body">
         <p class="card-text title-wrap">
@@ -16,9 +17,9 @@
             {{ restaurant.name }}
           </router-link>
         </p>
-        <span class="badge badge-secondary">{{
-          restaurant.Category.name
-        }}</span>
+        <span class="badge badge-secondary">
+          {{ restaurant.Category.name }}</span
+        >
         <p class="card-text text-truncate">
           {{ restaurant.description }}
         </p>
@@ -75,6 +76,7 @@ export default {
   data() {
     return {
       restaurant: this.initialRestaurant,
+      isLoading: true,
     };
   },
   methods: {
@@ -153,6 +155,10 @@ export default {
           title: "伺服器暫時無法將餐廳取消讚，請稍後再試",
         });
       }
+    },
+
+    changeLoading(e) {
+      this.isLoading = false;
     },
   },
 };

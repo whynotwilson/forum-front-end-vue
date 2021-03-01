@@ -1,37 +1,42 @@
 <template>
   <div class="container py-5">
     <h1>餐廳描述頁</h1>
-    <!-- 餐廳資訊頁 RestaurantDetail -->
-    <RestaurantDetail :initial-restaurant="restaurant" />
-    <hr />
+    <Spinner v-if="isLoading" />
+    <template v-else>
+      <!-- 餐廳資訊頁 RestaurantDetail -->
+      <RestaurantDetail :initial-restaurant="restaurant" />
+      <hr />
 
-    <!-- 餐廳評論 RestaurantComments -->
-    <RestaurantComments 
-      :restaurant-comments="restaurantComments"
-      @after-delete-comment="afterDeleteComment"
-    />
+      <!-- 餐廳評論 RestaurantComments -->
+      <RestaurantComments
+        :restaurant-comments="restaurantComments"
+        @after-delete-comment="afterDeleteComment"
+      />
 
-    <!-- 新增評論 CreateComment -->
-    <CreateComment 
-      :restaurant-id="restaurant.id"
-      @after-create-comment="afterCreateComment"
-    />
+      <!-- 新增評論 CreateComment -->
+      <CreateComment
+        :restaurant-id="restaurant.id"
+        @after-create-comment="afterCreateComment"
+      />
+    </template>
   </div>
 </template>
 
 <script>
 import RestaurantDetail from "./../components/RestaurantDetail";
-import RestaurantComments from "./../components/RestaurantComments"
-import CreateComment from "./../components/CreateComment"
-import restaurantsAPI from "./../apis/restaurants"
-import { Toast } from "./../utils/helpers"
-import { mapState } from 'vuex'
+import RestaurantComments from "./../components/RestaurantComments";
+import CreateComment from "./../components/CreateComment";
+import Spinner from "./../components/Spinner";
+import restaurantsAPI from "./../apis/restaurants";
+import { Toast } from "./../utils/helpers";
+import { mapState } from "vuex";
 
 export default {
   components: {
     RestaurantDetail,
     RestaurantComments,
-    CreateComment
+    CreateComment,
+    Spinner,
   },
 
   data() {
@@ -49,11 +54,12 @@ export default {
         isLiked: false,
       },
       restaurantComments: [],
+      isLoading: true,
     };
   },
 
   computed: {
-    ...mapState(['currentUser'])
+    ...mapState(["currentUser"]),
   },
 
   created() {
@@ -62,21 +68,21 @@ export default {
   },
 
   beforeRouteUpdate(to, from, next) {
-    const { id: restaurantId } = to.params
-    this.fetchRestaurant(restaurantId)
-    next()
+    const { id: restaurantId } = to.params;
+    this.fetchRestaurant(restaurantId);
+    next();
   },
 
   methods: {
     async fetchRestaurant(restaurantId) {
       try {
-        const { data } = await restaurantsAPI.getRestaurant({ restaurantId })
+        const { data } = await restaurantsAPI.getRestaurant({ restaurantId });
 
-        if (data.status === 'error') {
-          throw new Error(data.message)
+        if (data.status === "error") {
+          throw new Error(data.message);
         }
 
-        const { restaurant, isFavorited, isLiked } = data
+        const { restaurant, isFavorited, isLiked } = data;
         const {
           id,
           name,
@@ -86,51 +92,53 @@ export default {
           tel,
           address,
           description,
-          Comments
-        } = restaurant
+          Comments,
+        } = restaurant;
 
         this.restaurant = {
           id,
           name,
-          categoryName: Category ? Category.name : '未分類',
+          categoryName: Category ? Category.name : "未分類",
           image,
           openingHours,
           tel,
           address,
           description,
           isFavorited,
-          isLiked
-        }
+          isLiked,
+        };
 
-        this.restaurantComments = Comments
-      } catch(error) {
+        this.restaurantComments = Comments;
+        this.isLoading = false;
+      } catch (error) {
+        this.isLoading = false;
         Toast.fire({
-          icon: 'error',
-          title: '無法取得餐廳資料，請稍後再試'
-        })
+          icon: "error",
+          title: "無法取得餐廳資料，請稍後再試",
+        });
       }
     },
 
     afterDeleteComment(commentId) {
       this.restaurantComments = this.restaurantComments.filter(
-        comment => comment.id !== commentId
-      )
+        (comment) => comment.id !== commentId
+      );
     },
 
-    afterCreateComment (payload) {
-      const { commentId, restaurantId, text } = payload
+    afterCreateComment(payload) {
+      const { commentId, restaurantId, text } = payload;
       // console.log('payload', commentId, restaurantId, text)
       this.restaurantComments.push({
         id: commentId,
         RestaurantId: restaurantId,
         User: {
           id: this.currentUser.id,
-          name: this.currentUser.name
+          name: this.currentUser.name,
         },
         text,
-        createdAt: new Date()
-      })
-    }
+        createdAt: new Date(),
+      });
+    },
   },
 };
 </script>

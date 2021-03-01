@@ -24,7 +24,8 @@
         </div>
       </div>
     </form>
-    <table class="table">
+    <Spinner v-if="isLoading" />
+    <table v-else class="table">
       <thead class="thead-dark">
         <tr>
           <th scope="col" width="60">#</th>
@@ -92,17 +93,20 @@
 import AdminNav from "@/components/AdminNav";
 import uuid from "uuid/dist/v4";
 import adminAPI from "./../apis/admin";
+import Spinner from "./../components/Spinner";
 import { Toast } from "./../utils/helpers";
 
 export default {
   components: {
     AdminNav,
+    Spinner,
   },
 
   data() {
     return {
       categories: [],
       newCategoryName: "",
+      isLoading: true,
     };
   },
 
@@ -119,7 +123,9 @@ export default {
           isEditing: false,
           nameCached: "",
         }));
+        this.isLoading = false;
       } catch (error) {
+        this.isLoading = false;
         Toast.fire({
           icon: "error",
           title: error || "無法新增餐廳類別，請稍候再試",

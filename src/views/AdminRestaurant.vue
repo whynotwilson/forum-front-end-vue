@@ -1,6 +1,7 @@
 <template>
   <div class="container py-5">
-    <div class="row">
+    <Spinner v-if="isLoading" />
+    <div v-else class="row">
       <div class="col-md-12">
         <h1>{{ restaurant.name }}</h1>
         <span class="badge badge-secondary mt-1 mb-3">
@@ -11,8 +12,8 @@
         <img
           class="img-responsive center-block"
           :src="restaurant.image | emptyImage"
-          style="width: 250px;margin-bottom: 25px;"
-        >
+          style="width: 250px; margin-bottom: 25px"
+        />
         <div class="well">
           <ul class="list-unstyled">
             <li>
@@ -34,45 +35,46 @@
         <p>{{ restaurant.description }}</p>
       </div>
     </div>
-    <hr>
-    <button
-      type="button"
-      class="btn btn-link"
-      @click="$router.back()"
-    >回上一頁</button>
+    <hr />
+    <button type="button" class="btn btn-link" @click="$router.back()">
+      回上一頁
+    </button>
   </div>
 </template>
 <script>
-import { emptyImageFilter } from './../utils/mixins'
-import adminAPI from './../apis/admin'
-import { Toast } from './../utils/helpers'
+import { emptyImageFilter } from "./../utils/mixins";
+import adminAPI from "./../apis/admin";
+import Spinner from "./../components/Spinner";
+import { Toast } from "./../utils/helpers";
 
 export default {
-  name: 'AdminRestaurant',
+  name: "AdminRestaurant",
   mixins: [emptyImageFilter],
-  data () {
+  components: { Spinner },
+  data() {
     return {
       restaurant: {
         id: -1,
-        name: '',
-        categoryName: '',
-        image: '',
-        openingHours: '',
-        tel: '',
-        address: '',
-        description: ''
-      }
-    }
+        name: "",
+        categoryName: "",
+        image: "",
+        openingHours: "",
+        tel: "",
+        address: "",
+        description: "",
+      },
+      isLoading: true,
+    };
   },
-  mounted () {
-    const { id: restaurantId } = this.$route.params
-    this.fetchRestaurant(restaurantId)
+  mounted() {
+    const { id: restaurantId } = this.$route.params;
+    this.fetchRestaurant(restaurantId);
   },
   methods: {
-    async fetchRestaurant (restaurantId) {
+    async fetchRestaurant(restaurantId) {
       try {
-        const { data } = await adminAPI.restaurants.getDetail({ restaurantId })
-        const { restaurant } = data
+        const { data } = await adminAPI.restaurants.getDetail({ restaurantId });
+        const { restaurant } = data;
         this.restaurant = {
           ...this.restaurant,
           id: restaurant.id,
@@ -82,21 +84,23 @@ export default {
           openingHours: restaurant.opening_hours,
           tel: restaurant.tel,
           address: restaurant.address,
-          description: restaurant.description
-        }
+          description: restaurant.description,
+        };
+        this.isLoading = false;
       } catch (error) {
+        this.isLoading = false;
         Toast.fire({
-          icon: 'error',
-          title: '無法取得餐廳資料，請稍候再試'
-        })
+          icon: "error",
+          title: "無法取得餐廳資料，請稍候再試",
+        });
       }
-    }
+    },
   },
 
-  beforeRouteUpdate (to, from, next) {
-    const { id } = to.params
-    this.fetchRestaurant(id)
-    next()
-  }
-}
+  beforeRouteUpdate(to, from, next) {
+    const { id } = to.params;
+    this.fetchRestaurant(id);
+    next();
+  },
+};
 </script>
